@@ -1,0 +1,129 @@
+{
+  "sample_count": 60,
+  "extraction_metrics": {
+    "total": 60,
+    "title_accuracy": 1.0,
+    "time_accuracy": 1.0,
+    "priority_accuracy": 1.0,
+    "all_fields_accuracy": 1.0,
+    "counts": {
+      "title_correct": 60,
+      "time_correct": 60,
+      "priority_correct": 60,
+      "all_fields_correct": 60
+    },
+    "by_scenario": {
+      "course_exploration": {
+        "total": 7,
+        "title_accuracy": 1.0,
+        "time_accuracy": 1.0,
+        "priority_accuracy": 1.0,
+        "all_fields_accuracy": 1.0,
+        "counts": {
+          "title_correct": 7,
+          "time_correct": 7,
+          "priority_correct": 7,
+          "all_fields_correct": 7
+        }
+      },
+      "exam_prep": {
+        "total": 11,
+        "title_accuracy": 1.0,
+        "time_accuracy": 1.0,
+        "priority_accuracy": 1.0,
+        "all_fields_accuracy": 1.0,
+        "counts": {
+          "title_correct": 11,
+          "time_correct": 11,
+          "priority_correct": 11,
+          "all_fields_correct": 11
+        }
+      },
+      "general": {
+        "total": 37,
+        "title_accuracy": 1.0,
+        "time_accuracy": 1.0,
+        "priority_accuracy": 1.0,
+        "all_fields_accuracy": 1.0,
+        "counts": {
+          "title_correct": 37,
+          "time_correct": 37,
+          "priority_correct": 37,
+          "all_fields_correct": 37
+        }
+      },
+      "skill_building": {
+        "total": 5,
+        "title_accuracy": 1.0,
+        "time_accuracy": 1.0,
+        "priority_accuracy": 1.0,
+        "all_fields_accuracy": 1.0,
+        "counts": {
+          "title_correct": 5,
+          "time_correct": 5,
+          "priority_correct": 5,
+          "all_fields_correct": 5
+        }
+      }
+    }
+  },
+  "chat_metrics": {
+    "total": 60,
+    "conversation_success_rate": 0.9667,
+    "clarification_rate": 0.0333,
+    "llm_fallback_degradation_rate": 0.0,
+    "counts": {
+      "success_count": 58,
+      "clarify_count": 2,
+      "fallback_count": 0
+    },
+    "notes": "对话指标通过模拟链路评估：NLP 固定为 general_chat，依赖当前规则兜底与编排逻辑。",
+    "by_scenario": {
+      "course_exploration": {
+        "total": 7,
+        "conversation_success_rate": 0.8571,
+        "clarification_rate": 0.1429,
+        "llm_fallback_degradation_rate": 0.0,
+        "counts": {
+          "success_count": 6,
+          "clarify_count": 1,
+          "fallback_count": 0
+        }
+      },
+      "exam_prep": {
+        "total": 11,
+        "conversation_success_rate": 1.0,
+        "clarification_rate": 0.0,
+        "llm_fallback_degradation_rate": 0.0,
+        "counts": {
+          "success_count": 11,
+          "clarify_count": 0,
+          "fallback_count": 0
+        }
+      },
+      "general": {
+        "total": 37,
+        "conversation_success_rate": 0.973,
+        "clarification_rate": 0.027,
+        "llm_fallback_degradation_rate": 0.0,
+        "counts": {
+          "success_count": 36,
+          "clarify_count": 1,
+          "fallback_count": 0
+        }
+      },
+      "skill_building": {
+        "total": 5,
+        "conversation_success_rate": 1.0,
+        "clarification_rate": 0.0,
+        "llm_fallback_degradation_rate": 0.0,
+        "counts": {
+          "success_count": 5,
+          "clarify_count": 0,
+          "fallback_count": 0
+        }
+      }
+    }
+  },
+  "top_issues": []
+}

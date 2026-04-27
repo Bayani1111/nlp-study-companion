@@ -1,0 +1,58 @@
+{
+  "sample_count": 30,
+  "conversation_success_rate": 0.9667,
+  "clarification_rate": 0.0333,
+  "llm_fallback_degradation_rate": 0.0,
+  "counts": {
+    "success_count": 29,
+    "clarify_count": 1,
+    "fallback_count": 0
+  },
+  "notes": "路由级集成评估：通过 /api/chat 真实链路评估，LLM/NLP 采用固定 mock。",
+  "by_scenario": {
+    "course_exploration": {
+      "total": 5,
+      "conversation_success_rate": 1.0,
+      "clarification_rate": 0.0,
+      "llm_fallback_degradation_rate": 0.0,
+      "counts": {
+        "success_count": 5,
+        "clarify_count": 0,
+        "fallback_count": 0
+      }
+    },
+    "exam_prep": {
+      "total": 3,
+      "conversation_success_rate": 1.0,
+      "clarification_rate": 0.0,
+      "llm_fallback_degradation_rate": 0.0,
+      "counts": {
+        "success_count": 3,
+        "clarify_count": 0,
+        "fallback_count": 0
+      }
+    },
+    "general": {
+      "total": 20,
+      "conversation_success_rate": 0.95,
+      "clarification_rate": 0.05,
+      "llm_fallback_degradation_rate": 0.0,
+      "counts": {
+        "success_count": 19,
+        "clarify_count": 1,
+        "fallback_count": 0
+      }
+    },
+    "skill_building": {
+      "total": 2,
+      "conversation_success_rate": 1.0,
+      "clarification_rate": 0.0,
+      "llm_fallback_degradation_rate": 0.0,
+      "counts": {
+        "success_count": 2,
+        "clarify_count": 0,
+        "fallback_count": 0
+      }
+    }
+  }
+}

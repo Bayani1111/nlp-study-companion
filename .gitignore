@@ -1,0 +1,16 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+alembic/__pycache__/
+
+backend/.env
+backend/study_companion.db
+*.db
+*.sqlite
+*.sqlite3
+
+*.zip
+*.log

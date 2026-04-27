@@ -1,0 +1,75 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nlp-study-companion-app
+    env_file:
+      - backend/.env
+    environment:
+      APP_ENV: development
+      DATABASE_URL: sqlite+aiosqlite:///./data/study_companion.db
+      DEBUG: "true"
+      CORS_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+      - study_companion_data:/app/data
+    command:
+      [
+        "sh",
+        "-c",
+        "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir backend",
+      ]
+
+  postgres:
+    image: postgres:16
+    container_name: nlp-study-companion-postgres
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_DB: study_companion
+      POSTGRES_USER: study_companion
+      POSTGRES_PASSWORD: study_companion
+    ports:
+      - "5432:5432"
+    volumes:
+      - study_companion_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U study_companion -d study_companion"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app-postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: nlp-study-companion-app-postgres
+    profiles: ["postgres"]
+    env_file:
+      - backend/.env
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+asyncpg://study_companion:study_companion@postgres:5432/study_companion
+      DEBUG: "true"
+      CORS_ORIGINS: http://localhost:8000,http://127.0.0.1:8000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8001:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+    command:
+      [
+        "sh",
+        "-c",
+        "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir backend",
+      ]
+
+volumes:
+  study_companion_data:
+  study_companion_postgres_data:

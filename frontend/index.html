@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NLP 学习陪伴助手</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <nav class="navbar" id="navbar" style="display:none;">
+    <div class="logo">学习陪伴助手</div>
+    <div class="nav-links">
+      <a href="#chat">对话</a>
+      <a href="#tasks">任务</a>
+      <a href="#stats">统计</a>
+      <a href="#settings">设置</a>
+    </div>
+    <div class="nav-right">
+      <span id="nav-username" class="nav-username"></span>
+      <button class="btn-logout" onclick="logout()">退出</button>
+    </div>
+  </nav>
+
+  <div id="app"></div>
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="js/api.js"></script>
+  <script src="js/services/websocket.js"></script>
+  <script src="js/pages/auth.js"></script>
+  <script src="js/pages/chat.js"></script>
+  <script src="js/pages/tasks.js"></script>
+  <script src="js/pages/stats.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

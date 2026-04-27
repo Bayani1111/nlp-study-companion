@@ -1,0 +1,13 @@
+.git
+.github
+.pytest_cache
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.db
+*.zip
+backend/.env
+backend/__pycache__
+backend/tests/__pycache__
+frontend/__pycache__

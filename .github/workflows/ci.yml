@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  quality-and-tests:
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: testing
+      SECRET_KEY: test-secret-key
+      DATABASE_URL: sqlite+aiosqlite:///./ci_test.db
+      DEBUG: "true"
+      LOG_LEVEL: DEBUG
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install -r backend/requirements.txt
+
+      - name: Ruff lint
+        run: ruff check backend alembic
+
+      - name: Ruff format check
+        run: ruff format --check backend alembic
+
+      - name: Mypy check
+        run: mypy
+
+      - name: Alembic migration smoke test
+        env:
+          APP_ENV: testing
+          DATABASE_URL: sqlite+aiosqlite:///./ci_migration_test.db
+        run: alembic upgrade head
+
+      - name: Run backend tests
+        run: pytest backend/tests -q
+
+      - name: Run baseline extraction eval
+        run: PYTHONPATH=backend python scripts/baseline_eval.py
+
+      - name: Run baseline integration eval
+        run: PYTHONPATH=backend python scripts/baseline_integration_eval.py
+
+      - name: Baseline quality gate
+        env:
+          BASELINE_MIN_ALL_FIELDS_ACCURACY: "0.80"
+          BASELINE_MIN_CHAT_SUCCESS_RATE: "0.70"
+          BASELINE_MIN_INTEGRATION_SUCCESS_RATE: "0.70"
+          BASELINE_MIN_CHAT_SUCCESS_RATE_COURSE_EXPLORATION: "0.70"
+          BASELINE_MIN_CHAT_SUCCESS_RATE_EXAM_PREP: "0.70"
+          BASELINE_MIN_CHAT_SUCCESS_RATE_SKILL_BUILDING: "0.70"
+          BASELINE_MIN_CHAT_SUCCESS_RATE_GENERAL: "0.70"
+          BASELINE_MIN_INTEGRATION_SUCCESS_RATE_COURSE_EXPLORATION: "0.70"
+          BASELINE_MIN_INTEGRATION_SUCCESS_RATE_EXAM_PREP: "0.70"
+          BASELINE_MIN_INTEGRATION_SUCCESS_RATE_SKILL_BUILDING: "0.70"
+          BASELINE_MIN_INTEGRATION_SUCCESS_RATE_GENERAL: "0.70"
+        run: python scripts/check_baseline_quality.py
