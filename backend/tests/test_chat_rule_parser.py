@@ -10,8 +10,8 @@ from app.services.chat_rule_parser import (
     extract_subtasks_from_message,
     infer_plan_date_range,
     infer_time_of_day,
-    looks_like_task_request,
     looks_like_refinement_request,
+    looks_like_task_request,
     needs_plan_clarification,
 )
 
@@ -105,7 +105,9 @@ def test_build_fallback_entities_does_not_force_titles_for_consultation_question
 
 
 def test_build_fallback_entities_compacts_overlong_plan_title():
-    entities = build_fallback_entities("我想在一个月内学完计算机专业的主要课程，帮我列个合理的学习计划吧")
+    entities = build_fallback_entities(
+        "我想在一个月内学完计算机专业的主要课程，帮我列个合理的学习计划吧"
+    )
     assert entities["plan_title"] == "我想在一个月内学完计算机专业的主要课程"
 
 
@@ -157,7 +159,9 @@ def test_extract_goal_sections_from_reply_parses_goal_and_schedule_blocks():
     assert subtasks[0]["day_offset"] == 0
     assert subtasks[1]["day_offset"] == 1
     assert "10:00" in (subtasks[0].get("description") or "")
-    assert "提升计算速度和准确度" in (subtasks[1].get("description") or subtasks[1].get("title", ""))
+    assert "提升计算速度和准确度" in (
+        subtasks[1].get("description") or subtasks[1].get("title", "")
+    )
 
 
 def test_extract_bullet_subtasks_from_reply_parses_bullet_plan():
@@ -187,7 +191,9 @@ def test_extract_structured_subtasks_prefers_day_sections_over_bullets():
 
     assert len(subtasks) == 1
     assert "第1天" in subtasks[0]["title"]
-    assert "看笔记" in (subtasks[0].get("description") or "") and "整理错题" in (subtasks[0].get("description") or "")
+    assert "看笔记" in (subtasks[0].get("description") or "") and "整理错题" in (
+        subtasks[0].get("description") or ""
+    )
 
 
 def test_extract_structured_subtasks_ignores_conversational_reply():

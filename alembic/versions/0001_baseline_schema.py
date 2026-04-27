@@ -17,8 +17,12 @@ branch_labels = None
 depends_on = None
 
 
-message_role = postgresql.ENUM("user", "assistant", "system", name="message_role", create_type=False)
-plan_status = postgresql.ENUM("active", "completed", "archived", name="plan_status", create_type=False)
+message_role = postgresql.ENUM(
+    "user", "assistant", "system", name="message_role", create_type=False
+)
+plan_status = postgresql.ENUM(
+    "active", "completed", "archived", name="plan_status", create_type=False
+)
 task_priority = postgresql.ENUM("high", "medium", "low", name="task_priority", create_type=False)
 task_status = postgresql.ENUM(
     "pending",

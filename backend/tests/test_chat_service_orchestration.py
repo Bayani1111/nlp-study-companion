@@ -1,6 +1,6 @@
-﻿import sys
-import types
 import json
+import sys
+import types
 from datetime import date, datetime, timedelta
 from types import SimpleNamespace
 from unittest.mock import ANY, AsyncMock, patch
@@ -25,20 +25,33 @@ async def test_process_chat_message_falls_back_when_nlp_fails_but_llm_succeeds()
     session = SimpleNamespace(id=11)
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch(
             "app.services.chat_service.load_history",
             new=AsyncMock(return_value=[{"role": "assistant", "content": "old reply"}]),
         ),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
-        patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(side_effect=RuntimeError("nlp failed"))),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
+        patch(
+            "app.services.chat_service.call_llm_for_intent",
+            new=AsyncMock(side_effect=RuntimeError("nlp failed")),
+        ),
         patch("app.services.chat_service.resolve_intent", return_value=("chat", {})),
-        patch("app.services.chat_service.execute_intent", new=AsyncMock(return_value=(None, None, None))),
+        patch(
+            "app.services.chat_service.execute_intent",
+            new=AsyncMock(return_value=(None, None, None)),
+        ),
         patch("app.services.chat_service.build_companion_prompt", return_value="system prompt"),
         patch("app.services.chat_service.call_llm_api", new=AsyncMock(return_value="LLM reply")),
         patch("app.services.chat_service.save_message", new=AsyncMock()) as save_message,
-        patch("app.services.chat_service.record_learning_activity", new=AsyncMock()) as record_activity,
+        patch(
+            "app.services.chat_service.record_learning_activity", new=AsyncMock()
+        ) as record_activity,
     ):
         result = await process_chat_message(
             user_id=7,
@@ -61,7 +74,9 @@ async def test_process_chat_message_falls_back_when_nlp_fails_but_llm_succeeds()
         "scenario_label": "通用学习",
     }
     assert save_message.await_count == 2
-    save_message.assert_any_await(11, "assistant", "LLM reply", ANY, intent="chat", entities_json=ANY)
+    save_message.assert_any_await(
+        11, "assistant", "LLM reply", ANY, intent="chat", entities_json=ANY
+    )
     record_activity.assert_awaited_once_with(7, "chat", ANY)
     assistant_entities = json.loads(save_message.await_args_list[1].kwargs["entities_json"])
     assert assistant_entities["orchestration_diagnostics"]["event"] == "action_completed"
@@ -73,14 +88,28 @@ async def test_process_chat_message_injects_preference_memory_into_system_prompt
     llm_mock = AsyncMock(return_value="LLM reply")
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._load_user_preference_memory", new=AsyncMock(return_value={"time_budget": "每天一小时"})),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
-        patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(return_value={"intent": "chat", "entities": {}})),
+        patch(
+            "app.services.chat_service._load_user_preference_memory",
+            new=AsyncMock(return_value={"time_budget": "每天一小时"}),
+        ),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
+        patch(
+            "app.services.chat_service.call_llm_for_intent",
+            new=AsyncMock(return_value={"intent": "chat", "entities": {}}),
+        ),
         patch("app.services.chat_service.resolve_intent", return_value=("chat", {})),
-        patch("app.services.chat_service.execute_intent", new=AsyncMock(return_value=(None, None, None))),
+        patch(
+            "app.services.chat_service.execute_intent",
+            new=AsyncMock(return_value=(None, None, None)),
+        ),
         patch("app.services.chat_service.build_companion_prompt", return_value="system prompt"),
         patch("app.services.chat_service.call_llm_api", new=llm_mock),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
@@ -104,14 +133,27 @@ async def test_process_chat_message_extracts_and_persists_tone_style_preference(
     llm_mock = AsyncMock(return_value="收到，我会更直接推进。")
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._load_user_preference_memory", new=AsyncMock(return_value={})),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
-        patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(return_value={"intent": "chat", "entities": {}})),
+        patch(
+            "app.services.chat_service._load_user_preference_memory", new=AsyncMock(return_value={})
+        ),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
+        patch(
+            "app.services.chat_service.call_llm_for_intent",
+            new=AsyncMock(return_value={"intent": "chat", "entities": {}}),
+        ),
         patch("app.services.chat_service.resolve_intent", return_value=("chat", {})),
-        patch("app.services.chat_service.execute_intent", new=AsyncMock(return_value=(None, None, None))),
+        patch(
+            "app.services.chat_service.execute_intent",
+            new=AsyncMock(return_value=(None, None, None)),
+        ),
         patch("app.services.chat_service.build_companion_prompt", return_value="system prompt"),
         patch("app.services.chat_service.call_llm_api", new=llm_mock),
         patch("app.services.chat_service.save_message", new=AsyncMock()) as save_message,
@@ -137,18 +179,34 @@ async def test_process_chat_message_continues_when_task_action_returns_empty_res
     session = SimpleNamespace(id=22)
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
         patch(
             "app.services.chat_service.call_llm_for_intent",
-            new=AsyncMock(return_value={"intent": "create_task", "entities": {"task_title": "Write notes"}}),
+            new=AsyncMock(
+                return_value={"intent": "create_task", "entities": {"task_title": "Write notes"}}
+            ),
         ),
-        patch("app.services.chat_service.resolve_intent", return_value=("create_task", {"task_title": "Write notes"})),
-        patch("app.services.chat_service.execute_intent", new=AsyncMock(return_value=(None, None, None))),
+        patch(
+            "app.services.chat_service.resolve_intent",
+            return_value=("create_task", {"task_title": "Write notes"}),
+        ),
+        patch(
+            "app.services.chat_service.execute_intent",
+            new=AsyncMock(return_value=(None, None, None)),
+        ),
         patch("app.services.chat_service.build_companion_prompt", return_value="task prompt"),
-        patch("app.services.chat_service.call_llm_api", new=AsyncMock(return_value="I can still help you plan this.")),
+        patch(
+            "app.services.chat_service.call_llm_api",
+            new=AsyncMock(return_value="I can still help you plan this."),
+        ),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
     ):
@@ -170,15 +228,25 @@ async def test_process_chat_message_prefixes_reply_when_task_created_successfull
     created_task = SimpleNamespace(id=5, title="Read chapter 3", children=[])
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
         patch(
             "app.services.chat_service.call_llm_for_intent",
-            new=AsyncMock(return_value={"intent": "create_task", "entities": {"task_title": "Read chapter 3"}}),
+            new=AsyncMock(
+                return_value={"intent": "create_task", "entities": {"task_title": "Read chapter 3"}}
+            ),
         ),
-        patch("app.services.chat_service.resolve_intent", return_value=("create_task", {"task_title": "Read chapter 3"})),
+        patch(
+            "app.services.chat_service.resolve_intent",
+            return_value=("create_task", {"task_title": "Read chapter 3"}),
+        ),
         patch(
             "app.services.chat_service.execute_intent",
             new=AsyncMock(
@@ -189,7 +257,10 @@ async def test_process_chat_message_prefixes_reply_when_task_created_successfull
                 )
             ),
         ),
-        patch("app.services.chat_service.call_llm_api", new=AsyncMock(return_value="Finish it tonight.")),
+        patch(
+            "app.services.chat_service.call_llm_api",
+            new=AsyncMock(return_value="Finish it tonight."),
+        ),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
     ):
@@ -200,7 +271,9 @@ async def test_process_chat_message_prefixes_reply_when_task_created_successfull
             db=AsyncMock(),
         )
 
-    assert result["reply"] == "已帮你创建任务：Read chapter 3\n\n主任务「Read chapter 3」已记入系统。"
+    assert (
+        result["reply"] == "已帮你创建任务：Read chapter 3\n\n主任务「Read chapter 3」已记入系统。"
+    )
     assert result["next_prompt"] is not None
     assert result["next_prompt_options"] == ["今晚10点前完成并提醒我", "明晚20:00提醒我开始"]
 
@@ -208,7 +281,9 @@ async def test_process_chat_message_prefixes_reply_when_task_created_successfull
 @pytest.mark.asyncio
 async def test_process_chat_message_does_not_generate_day_subtasks_during_initial_plan_creation():
     session = SimpleNamespace(id=55)
-    created_plan = SimpleNamespace(id=6, title="高数复习计划", start_date=date(2026, 4, 28), phases=[])
+    created_plan = SimpleNamespace(
+        id=6, title="高数复习计划", start_date=date(2026, 4, 28), phases=[]
+    )
     created_task = SimpleNamespace(
         id=9,
         title="下周高数复习计划",
@@ -230,12 +305,20 @@ async def test_process_chat_message_does_not_generate_day_subtasks_during_initia
     )
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
         patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(return_value=None)),
-        patch("app.services.chat_service.resolve_intent", return_value=("create_plan", {"plan_title": "高数复习计划"})),
+        patch(
+            "app.services.chat_service.resolve_intent",
+            return_value=("create_plan", {"plan_title": "高数复习计划"}),
+        ),
         patch(
             "app.services.chat_service.execute_intent",
             new=AsyncMock(
@@ -260,7 +343,9 @@ async def test_process_chat_message_does_not_generate_day_subtasks_during_initia
         ),
         patch(
             "app.services.chat_service.task_service.get_task",
-            new=AsyncMock(side_effect=[SimpleNamespace(**refreshed_task_before), refreshed_task_after]),
+            new=AsyncMock(
+                side_effect=[SimpleNamespace(**refreshed_task_before), refreshed_task_after]
+            ),
         ),
         patch(
             "app.services.chat_service.task_service.serialize_task",
@@ -270,8 +355,12 @@ async def test_process_chat_message_does_not_generate_day_subtasks_during_initia
             "app.services.chat_service.task_service.create_task",
             new=AsyncMock(
                 side_effect=[
-                    SimpleNamespace(id=10, title="第1天·任务1 · 复习课本/笔记", plan_id=6, parent_task_id=9),
-                    SimpleNamespace(id=11, title="第2天·任务1 · 刷 20 道例题", plan_id=6, parent_task_id=9),
+                    SimpleNamespace(
+                        id=10, title="第1天·任务1 · 复习课本/笔记", plan_id=6, parent_task_id=9
+                    ),
+                    SimpleNamespace(
+                        id=11, title="第2天·任务1 · 刷 20 道例题", plan_id=6, parent_task_id=9
+                    ),
                 ]
             ),
         ) as create_subtask,
@@ -294,7 +383,9 @@ async def test_process_chat_message_does_not_generate_day_subtasks_during_initia
 @pytest.mark.asyncio
 async def test_process_chat_message_refines_existing_plan_instead_of_creating_new_plan():
     session = SimpleNamespace(id=77)
-    existing_plan = SimpleNamespace(id=21, title="下周高数复习计划", start_date=date(2026, 4, 28), phases=[])
+    existing_plan = SimpleNamespace(
+        id=21, title="下周高数复习计划", start_date=date(2026, 4, 28), phases=[]
+    )
     existing_task = SimpleNamespace(
         id=31,
         title="下周高数复习",
@@ -313,7 +404,9 @@ async def test_process_chat_message_refines_existing_plan_instead_of_creating_ne
     )
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch(
             "app.services.chat_service.load_structured_history",
@@ -405,7 +498,9 @@ async def test_process_chat_message_refines_existing_plan_instead_of_creating_ne
 @pytest.mark.asyncio
 async def test_process_chat_message_refine_plan_falls_back_to_plan_title_when_task_context_missing():
     session = SimpleNamespace(id=88)
-    existing_plan = SimpleNamespace(id=41, title="下周高数复习计划", start_date=date(2026, 4, 28), phases=[])
+    existing_plan = SimpleNamespace(
+        id=41, title="下周高数复习计划", start_date=date(2026, 4, 28), phases=[]
+    )
     created_root_task = SimpleNamespace(
         id=51,
         title="下周高数复习计划",
@@ -417,7 +512,9 @@ async def test_process_chat_message_refine_plan_falls_back_to_plan_title_when_ta
     )
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch(
             "app.services.chat_service.load_structured_history",
@@ -449,14 +546,29 @@ async def test_process_chat_message_refine_plan_falls_back_to_plan_title_when_ta
             new=AsyncMock(
                 return_value=(
                     {"plan": existing_plan, "task": created_root_task, "refinement_mode": True},
-                    [{"id": 51, "title": "下周高数复习计划", "plan_id": 41, "parent_task_id": None}],
+                    [
+                        {
+                            "id": 51,
+                            "title": "下周高数复习计划",
+                            "plan_id": 41,
+                            "parent_task_id": None,
+                        }
+                    ],
                     [{"id": 41, "title": "下周高数复习计划"}],
                 )
             ),
         ),
-        patch("app.services.chat_service.call_llm_api", new=AsyncMock(return_value="我会继续细化这份计划。")),
-        patch("app.services.chat_service.task_service.get_task", new=AsyncMock(return_value=created_root_task)),
-        patch("app.services.chat_service.task_service.serialize_task", return_value={"children": []}),
+        patch(
+            "app.services.chat_service.call_llm_api",
+            new=AsyncMock(return_value="我会继续细化这份计划。"),
+        ),
+        patch(
+            "app.services.chat_service.task_service.get_task",
+            new=AsyncMock(return_value=created_root_task),
+        ),
+        patch(
+            "app.services.chat_service.task_service.serialize_task", return_value={"children": []}
+        ),
         patch("app.services.chat_service.task_service.create_task", new=AsyncMock()),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
@@ -477,10 +589,15 @@ async def test_process_chat_message_clarifies_before_creating_plan_when_goal_is_
     session = SimpleNamespace(id=101)
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
         patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(return_value=None)),
         patch(
             "app.services.chat_service.save_message",
@@ -508,11 +625,19 @@ async def test_process_chat_message_clarifies_for_natural_broad_learning_goal_ph
     session = SimpleNamespace(id=103)
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
-        patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(return_value={"intent": "create_plan", "entities": {}})),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
+        patch(
+            "app.services.chat_service.call_llm_for_intent",
+            new=AsyncMock(return_value={"intent": "create_plan", "entities": {}}),
+        ),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
         patch("app.services.chat_service.execute_intent", new=AsyncMock()) as execute_intent,
@@ -534,10 +659,15 @@ async def test_process_chat_message_uses_exam_style_clarification_for_exam_goal(
     session = SimpleNamespace(id=104)
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
         patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(return_value=None)),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
@@ -560,10 +690,15 @@ async def test_process_chat_message_uses_skill_style_clarification_for_skill_goa
     session = SimpleNamespace(id=105)
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
         patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(return_value=None)),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
@@ -594,7 +729,9 @@ async def test_process_chat_message_expires_stale_pending_plan_context_by_turn_c
         "created_at": datetime.utcnow().isoformat(),
     }
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
         patch(
@@ -627,11 +764,19 @@ async def test_process_chat_message_uses_preference_seed_to_reduce_forced_clarif
         "start_hint": None,
     }
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
-        patch("app.services.chat_service._load_user_preference_memory", new=AsyncMock(return_value=preference_seed)),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
+        patch(
+            "app.services.chat_service._load_user_preference_memory",
+            new=AsyncMock(return_value=preference_seed),
+        ),
         patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(return_value=None)),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
@@ -654,15 +799,27 @@ async def test_process_chat_message_uses_preference_seed_to_reduce_forced_clarif
 async def test_process_chat_message_passes_response_density_to_prompt_builder():
     session = SimpleNamespace(id=112)
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
         patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(return_value=None)),
         patch("app.services.chat_service.resolve_intent", return_value=("chat", {})),
-        patch("app.services.chat_service.execute_intent", new=AsyncMock(return_value=(None, None, None))),
-        patch("app.services.chat_service.build_companion_prompt", return_value="prompt") as prompt_builder,
-        patch("app.services.chat_service.call_llm_api", new=AsyncMock(return_value="好的，已记下。")),
+        patch(
+            "app.services.chat_service.execute_intent",
+            new=AsyncMock(return_value=(None, None, None)),
+        ),
+        patch(
+            "app.services.chat_service.build_companion_prompt", return_value="prompt"
+        ) as prompt_builder,
+        patch(
+            "app.services.chat_service.call_llm_api", new=AsyncMock(return_value="好的，已记下。")
+        ),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
     ):
@@ -693,7 +850,9 @@ async def test_process_chat_message_keeps_guiding_after_first_clarification_answ
     session = SimpleNamespace(id=106)
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch(
             "app.services.chat_service.load_structured_history",
@@ -749,7 +908,9 @@ async def test_process_chat_message_skips_time_budget_question_when_preference_k
     session = SimpleNamespace(id=109)
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch(
             "app.services.chat_service.load_structured_history",
@@ -771,7 +932,10 @@ async def test_process_chat_message_skips_time_budget_question_when_preference_k
                 ]
             ),
         ),
-        patch("app.services.chat_service._load_user_preference_memory", new=AsyncMock(return_value={"time_budget": "每天晚上两小时"})),
+        patch(
+            "app.services.chat_service._load_user_preference_memory",
+            new=AsyncMock(return_value={"time_budget": "每天晚上两小时"}),
+        ),
         patch(
             "app.services.chat_service._hydrate_recent_action_context",
             new=AsyncMock(
@@ -805,7 +969,9 @@ async def test_process_chat_message_skips_time_budget_question_when_preference_k
 @pytest.mark.asyncio
 async def test_process_chat_message_builds_plan_only_after_staged_answers_are_complete():
     session = SimpleNamespace(id=107)
-    created_plan = SimpleNamespace(id=12, title="数据结构入门学习计划", start_date=date(2026, 4, 28), phases=[])
+    created_plan = SimpleNamespace(
+        id=12, title="数据结构入门学习计划", start_date=date(2026, 4, 28), phases=[]
+    )
     created_task = SimpleNamespace(
         id=18,
         title="数据结构",
@@ -816,7 +982,9 @@ async def test_process_chat_message_builds_plan_only_after_staged_answers_are_co
     )
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch(
             "app.services.chat_service.load_structured_history",
@@ -869,7 +1037,10 @@ async def test_process_chat_message_builds_plan_only_after_staged_answers_are_co
                 )
             ),
         ) as execute_intent,
-        patch("app.services.chat_service.call_llm_api", new=AsyncMock(return_value="好的，我们就按这个节奏推进。")),
+        patch(
+            "app.services.chat_service.call_llm_api",
+            new=AsyncMock(return_value="好的，我们就按这个节奏推进。"),
+        ),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
     ):
@@ -888,7 +1059,9 @@ async def test_process_chat_message_builds_plan_only_after_staged_answers_are_co
 @pytest.mark.asyncio
 async def test_process_chat_message_treats_continuation_phrase_as_refine_plan():
     session = SimpleNamespace(id=108)
-    existing_plan = SimpleNamespace(id=21, title="数据结构入门学习计划", start_date=date(2026, 4, 28), phases=[])
+    existing_plan = SimpleNamespace(
+        id=21, title="数据结构入门学习计划", start_date=date(2026, 4, 28), phases=[]
+    )
     existing_task = SimpleNamespace(
         id=31,
         title="数据结构",
@@ -899,7 +1072,9 @@ async def test_process_chat_message_treats_continuation_phrase_as_refine_plan():
     )
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch(
             "app.services.chat_service.load_structured_history",
@@ -939,7 +1114,10 @@ async def test_process_chat_message_treats_continuation_phrase_as_refine_plan():
                 )
             ),
         ) as execute_intent,
-        patch("app.services.chat_service.call_llm_api", new=AsyncMock(return_value="好的，我继续沿着这个计划往下细化。")),
+        patch(
+            "app.services.chat_service.call_llm_api",
+            new=AsyncMock(return_value="好的，我继续沿着这个计划往下细化。"),
+        ),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
     ):
@@ -960,11 +1138,17 @@ async def test_process_chat_message_treats_continuation_phrase_as_refine_plan():
 @pytest.mark.asyncio
 async def test_process_chat_message_uses_pending_plan_context_when_user_answers_clarification():
     session = SimpleNamespace(id=102)
-    created_plan = SimpleNamespace(id=12, title="计算机专业课入门", start_date=date(2026, 4, 28), phases=[])
-    created_task = SimpleNamespace(id=18, title="计算机专业课入门", plan_id=12, priority="medium", children=[], due_date=None)
+    created_plan = SimpleNamespace(
+        id=12, title="计算机专业课入门", start_date=date(2026, 4, 28), phases=[]
+    )
+    created_task = SimpleNamespace(
+        id=18, title="计算机专业课入门", plan_id=12, priority="medium", children=[], due_date=None
+    )
 
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch(
             "app.services.chat_service.load_structured_history",
@@ -1009,12 +1193,22 @@ async def test_process_chat_message_uses_pending_plan_context_when_user_answers_
             new=AsyncMock(
                 return_value=(
                     {"plan": created_plan, "task": created_task},
-                    [{"id": 18, "title": "计算机专业课入门", "plan_id": 12, "parent_task_id": None}],
+                    [
+                        {
+                            "id": 18,
+                            "title": "计算机专业课入门",
+                            "plan_id": 12,
+                            "parent_task_id": None,
+                        }
+                    ],
                     [{"id": 12, "title": "计算机专业课入门"}],
                 )
             ),
         ) as execute_intent,
-        patch("app.services.chat_service.call_llm_api", new=AsyncMock(return_value="好的，我会继续带你往下推进。")),
+        patch(
+            "app.services.chat_service.call_llm_api",
+            new=AsyncMock(return_value="好的，我会继续带你往下推进。"),
+        ),
         patch("app.services.chat_service.save_message", new=AsyncMock()),
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
     ):
@@ -1034,17 +1228,30 @@ async def test_process_chat_message_uses_pending_plan_context_when_user_answers_
 async def test_process_chat_message_stages_plan_proposal_for_consultative_question():
     session = SimpleNamespace(id=201)
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch("app.services.chat_service.load_structured_history", new=AsyncMock(return_value=[])),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
         patch(
             "app.services.chat_service.call_llm_for_intent",
-            new=AsyncMock(return_value={"intent": "create_plan", "entities": {"plan_title": "计算机核心课程"}}),
+            new=AsyncMock(
+                return_value={"intent": "create_plan", "entities": {"plan_title": "计算机核心课程"}}
+            ),
         ),
-        patch("app.services.chat_service.resolve_intent", return_value=("create_plan", {"plan_title": "计算机核心课程"})),
+        patch(
+            "app.services.chat_service.resolve_intent",
+            return_value=("create_plan", {"plan_title": "计算机核心课程"}),
+        ),
         patch("app.services.chat_service.execute_intent", new=AsyncMock()) as execute_intent_mock,
-        patch("app.services.chat_service.call_llm_api", new=AsyncMock(return_value="这是计划草案预览。")) as llm_mock,
+        patch(
+            "app.services.chat_service.call_llm_api",
+            new=AsyncMock(return_value="这是计划草案预览。"),
+        ) as llm_mock,
         patch("app.services.chat_service.save_message", new=AsyncMock()) as save_message_mock,
         patch("app.services.chat_service.record_learning_activity", new=AsyncMock()),
     ):
@@ -1067,9 +1274,14 @@ async def test_process_chat_message_stages_plan_proposal_for_consultative_questi
 @pytest.mark.asyncio
 async def test_process_chat_message_commits_pending_plan_after_user_confirmation():
     session = SimpleNamespace(id=202)
-    pending_entities = {"plan_title": "计算机核心课程学习计划", "task_title": "计算机核心课程学习计划"}
+    pending_entities = {
+        "plan_title": "计算机核心课程学习计划",
+        "task_title": "计算机核心课程学习计划",
+    }
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch(
             "app.services.chat_service.load_structured_history",
@@ -1092,14 +1304,23 @@ async def test_process_chat_message_commits_pending_plan_after_user_confirmation
                 ]
             ),
         ),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
-        patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(return_value={"intent": "chat", "entities": {}})),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
+        patch(
+            "app.services.chat_service.call_llm_for_intent",
+            new=AsyncMock(return_value={"intent": "chat", "entities": {}}),
+        ),
         patch("app.services.chat_service.resolve_intent", return_value=("chat", {})),
         patch(
             "app.services.chat_service.execute_intent",
             new=AsyncMock(
                 return_value=(
-                    {"plan": SimpleNamespace(id=1, title="计划"), "task": SimpleNamespace(title="主任务", children=[])},
+                    {
+                        "plan": SimpleNamespace(id=1, title="计划"),
+                        "task": SimpleNamespace(title="主任务", children=[]),
+                    },
                     [],
                     [],
                 )
@@ -1129,7 +1350,9 @@ async def test_process_chat_message_commits_pending_plan_after_user_confirmation
 async def test_process_chat_message_commit_uses_two_week_suffix_when_detected():
     session = SimpleNamespace(id=303)
     with (
-        patch("app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)),
+        patch(
+            "app.services.chat_service.get_or_create_session", new=AsyncMock(return_value=session)
+        ),
         patch("app.services.chat_service.load_history", new=AsyncMock(return_value=[])),
         patch(
             "app.services.chat_service.load_structured_history",
@@ -1152,14 +1375,23 @@ async def test_process_chat_message_commit_uses_two_week_suffix_when_detected():
                 ]
             ),
         ),
-        patch("app.services.chat_service._hydrate_recent_action_context", new=AsyncMock(return_value={})),
-        patch("app.services.chat_service.call_llm_for_intent", new=AsyncMock(return_value={"intent": "chat", "entities": {}})),
+        patch(
+            "app.services.chat_service._hydrate_recent_action_context",
+            new=AsyncMock(return_value={}),
+        ),
+        patch(
+            "app.services.chat_service.call_llm_for_intent",
+            new=AsyncMock(return_value={"intent": "chat", "entities": {}}),
+        ),
         patch("app.services.chat_service.resolve_intent", return_value=("chat", {})),
         patch(
             "app.services.chat_service.execute_intent",
             new=AsyncMock(
                 return_value=(
-                    {"plan": SimpleNamespace(id=1, title="两周冲刺"), "task": SimpleNamespace(title="主任务", children=[])},
+                    {
+                        "plan": SimpleNamespace(id=1, title="两周冲刺"),
+                        "task": SimpleNamespace(title="主任务", children=[]),
+                    },
                     [],
                     [],
                 )
@@ -1182,7 +1414,10 @@ async def test_process_chat_message_commit_uses_two_week_suffix_when_detected():
 
 
 def test_extract_explicit_plan_title_prefers_bracket_over_day_header():
-    from app.services.chat_service import _build_commit_entities_from_proposal, _extract_explicit_plan_title
+    from app.services.chat_service import (
+        _build_commit_entities_from_proposal,
+        _extract_explicit_plan_title,
+    )
 
     draft = (
         "### 周计划草案\n"
@@ -1227,7 +1462,9 @@ def test_build_commit_entities_prefers_source_goal_and_filters_question_subtasks
 
     assert "英语" in entities["plan_title"] or "背单词" in entities["plan_title"]
     assert "多少" not in entities["plan_title"]
-    assert "subtasks" not in entities or all("？" not in item["title"] for item in entities["subtasks"])
+    assert "subtasks" not in entities or all(
+        "？" not in item["title"] for item in entities["subtasks"]
+    )
 
 
 def test_build_commit_entities_avoids_generic_plan_wording_as_title():
@@ -1262,4 +1499,3 @@ def test_build_commit_entities_standardizes_plan_title_and_task_title():
     assert "英语" in entities["plan_title"] or "背单词" in entities["plan_title"]
     assert "计划计划" not in entities["plan_title"]
     assert not entities["task_title"].endswith("计划")
-

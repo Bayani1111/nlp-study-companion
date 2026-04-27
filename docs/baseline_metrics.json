@@ -2,15 +2,15 @@
   "sample_count": 60,
   "extraction_metrics": {
     "total": 60,
-    "title_accuracy": 1.0,
+    "title_accuracy": 0.9833,
     "time_accuracy": 1.0,
     "priority_accuracy": 1.0,
-    "all_fields_accuracy": 1.0,
+    "all_fields_accuracy": 0.9833,
     "counts": {
-      "title_correct": 60,
+      "title_correct": 59,
       "time_correct": 60,
       "priority_correct": 60,
-      "all_fields_correct": 60
+      "all_fields_correct": 59
     },
     "by_scenario": {
       "course_exploration": {
@@ -41,15 +41,15 @@
       },
       "general": {
         "total": 37,
-        "title_accuracy": 1.0,
+        "title_accuracy": 0.973,
         "time_accuracy": 1.0,
         "priority_accuracy": 1.0,
-        "all_fields_accuracy": 1.0,
+        "all_fields_accuracy": 0.973,
         "counts": {
-          "title_correct": 37,
+          "title_correct": 36,
           "time_correct": 37,
           "priority_correct": 37,
-          "all_fields_correct": 37
+          "all_fields_correct": 36
         }
       },
       "skill_building": {
@@ -69,13 +69,13 @@
   },
   "chat_metrics": {
     "total": 60,
-    "conversation_success_rate": 0.9667,
+    "conversation_success_rate": 0.85,
     "clarification_rate": 0.0333,
-    "llm_fallback_degradation_rate": 0.0,
+    "llm_fallback_degradation_rate": 0.0167,
     "counts": {
-      "success_count": 58,
+      "success_count": 51,
       "clarify_count": 2,
-      "fallback_count": 0
+      "fallback_count": 1
     },
     "notes": "对话指标通过模拟链路评估：NLP 固定为 general_chat，依赖当前规则兜底与编排逻辑。",
     "by_scenario": {
@@ -92,13 +92,13 @@
       },
       "exam_prep": {
         "total": 11,
-        "conversation_success_rate": 1.0,
+        "conversation_success_rate": 0.4545,
         "clarification_rate": 0.0,
-        "llm_fallback_degradation_rate": 0.0,
+        "llm_fallback_degradation_rate": 0.0909,
         "counts": {
-          "success_count": 11,
+          "success_count": 5,
           "clarify_count": 0,
-          "fallback_count": 0
+          "fallback_count": 1
         }
       },
       "general": {
@@ -114,16 +114,37 @@
       },
       "skill_building": {
         "total": 5,
-        "conversation_success_rate": 1.0,
+        "conversation_success_rate": 0.8,
         "clarification_rate": 0.0,
         "llm_fallback_degradation_rate": 0.0,
         "counts": {
-          "success_count": 5,
+          "success_count": 4,
           "clarify_count": 0,
           "fallback_count": 0
         }
       }
     }
   },
-  "top_issues": []
+  "top_issues": [
+    {
+      "id": 22,
+      "text": "我回头再看编译原理视频课",
+      "predicted": {
+        "title": "我回头",
+        "has_due_date": false,
+        "priority": "low"
+      },
+      "expected": {
+        "title_keywords": [
+          "编译原理",
+          "视频"
+        ],
+        "has_due_date": false,
+        "priority": "low"
+      },
+      "failed_fields": [
+        "title"
+      ]
+    }
+  ]
 }

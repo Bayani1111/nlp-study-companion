@@ -435,7 +435,9 @@ async def test_create_subtask_returns_nested_children_in_task_list(api_test_app:
 
 
 @pytest.mark.asyncio
-async def test_cleanup_advisory_subtasks_dry_run_returns_candidates_without_deleting(api_test_app: FastAPI):
+async def test_cleanup_advisory_subtasks_dry_run_returns_candidates_without_deleting(
+    api_test_app: FastAPI,
+):
     async with AsyncClient(
         transport=ASGITransport(app=api_test_app),
         base_url="http://testserver",

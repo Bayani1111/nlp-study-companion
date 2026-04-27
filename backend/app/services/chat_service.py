@@ -4,8 +4,8 @@ import json
 import logging
 import re
 import uuid
-from inspect import isawaitable
 from datetime import date, datetime, time, timedelta, timezone
+from inspect import isawaitable
 from typing import Any
 
 from sqlalchemy import select
@@ -13,13 +13,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import ChatMessage, ChatSession, User
 from app.services import plan_service, task_service
-from app.services.chat_prompts import build_companion_prompt
 from app.services.chat_guidance_templates import (
     build_clarify_quick_replies,
     build_force_clarify_next_prompt,
     build_force_clarify_reply,
     build_initial_choice_prompt,
 )
+from app.services.chat_prompts import build_companion_prompt
 from app.services.chat_rule_parser import extract_structured_subtasks_from_reply
 from app.services.chat_session_service import (
     get_or_create_session,
@@ -185,7 +185,11 @@ def _log_chat_orchestration(event: str, **payload: Any) -> None:
         for key, value in payload.items()
         if isinstance(value, (str, int, float, bool, type(None), list, dict))
     }
-    logger.info("chat_orchestration_event=%s payload=%s", event, json.dumps(safe_payload, ensure_ascii=False))
+    logger.info(
+        "chat_orchestration_event=%s payload=%s",
+        event,
+        json.dumps(safe_payload, ensure_ascii=False),
+    )
 
 
 def _attach_orchestration_diagnostics(
@@ -378,7 +382,11 @@ def _pick_phase_id(
 
     phases = getattr(plan, "phases", []) or []
     for phase in phases:
-        if phase.start_date and phase.end_date and phase.start_date <= target_date <= phase.end_date:
+        if (
+            phase.start_date
+            and phase.end_date
+            and phase.start_date <= target_date <= phase.end_date
+        ):
             return int(phase.id)
 
     phase_title_hint = (step.get("phase_title_hint") or "").strip()
@@ -435,7 +443,9 @@ def _build_pending_plan_entities(
             "created_at": created_at or now_iso,
             "entities": {
                 "plan_title": entities.get("plan_title"),
-                "plan_description": entities.get("plan_description") or entities.get("description") or message,
+                "plan_description": entities.get("plan_description")
+                or entities.get("description")
+                or message,
                 "task_title": entities.get("task_title") or entities.get("plan_title"),
                 "priority": entities.get("priority"),
                 "should_create_task": entities.get("should_create_task"),
@@ -685,7 +695,9 @@ def _standardize_plan_title_core(title: str, source_message: str) -> str:
     has_goal_word = bool(re.search(r"(计划|备考|复习|冲刺|准备|提升|训练|学习)", core))
     if not has_goal_word:
         core = f"{core}学习计划"
-    elif not re.search(r"计划$", core) and re.search(r"(备考|复习|冲刺|准备|提升|训练|学习)$", core):
+    elif not re.search(r"计划$", core) and re.search(
+        r"(备考|复习|冲刺|准备|提升|训练|学习)$", core
+    ):
         core = f"{core}计划"
 
     return _clip_for_storage(core, 36) or "学习计划"
@@ -713,9 +725,7 @@ def _first_brief_line_for_plan_stored_text(block: str) -> str | None:
         line = _strip_chinese_filler_leading(raw.strip())
         if not line or line in {"---", "——", "---"}:
             continue
-        if re.match(r"^#{1,4}\s", line) or re.match(
-            r"^第[一二三四五六七八九十0-9０-９]+天", line
-        ):
+        if re.match(r"^#{1,4}\s", line) or re.match(r"^第[一二三四五六七八九十0-9０-９]+天", line):
             continue
         if re.match(r"^Day\s*\d", line, re.I):
             continue
@@ -744,7 +754,11 @@ def _build_root_plan_and_task_brief(
         head = f"本计划已按 {day_count} 天拆成子任务。每天只保留一条主条目，时间轴与细项在对应子任务中查看；下方为总览。"
     else:
         head = "学习安排概要。更细的拆步见子任务或聊天原文。"
-    body = line or _clip_for_storage((full_text or "").strip().replace("\n", " "), 400) or "（可回到对话中查看完整稿。）"
+    body = (
+        line
+        or _clip_for_storage((full_text or "").strip().replace("\n", " "), 400)
+        or "（可回到对话中查看完整稿。）"
+    )
     return _clip_for_storage(f"{head}\n{body}", 2000) or (body or "")
 
 
@@ -781,7 +795,8 @@ def _finalize_extracted_name_fragment(raw: str) -> str | None:
     s = re.sub(r"[*_`#]+", "", (raw or "").strip())
     s = s.strip(" ·•")
     s = _strip_chinese_filler_leading(s)
-    s = _clip_for_storage(s, 64) if s else None
+    if s:
+        s = _clip_for_storage(s, 64)
     if not s or len(s) < 2:
         return None
     return _clean_title_candidate(s) or s[:36]
@@ -796,7 +811,9 @@ def _score_bracket_title_candidate(
     if not s or _is_day_scoped_title(s):
         return -100
     score = 0
-    if re.search(r"(阶段|备考|计划|复习|周次|模考|基础|强化|冲刺|课程|项目|论文|实习|求职|语言)", s):
+    if re.search(
+        r"(阶段|备考|计划|复习|周次|模考|基础|强化|冲刺|课程|项目|论文|实习|求职|语言)", s
+    ):
         score += 4
     if "主任务" in context_before[-30:]:
         score += 5
@@ -870,7 +887,9 @@ def _extract_plan_summary_from_proposal(proposal_text: str) -> str | None:
         if "以下为你" in line or "以下这份" in line or line.strip().startswith("草案"):
             continue
         line = _strip_title_emojis(line)
-        if re.match(r"^第[一二三四五六七八九十0-9０-９]+天", line) or re.match(r"^Day\s*\d", line, re.I):
+        if re.match(r"^第[一二三四五六七八九十0-9０-９]+天", line) or re.match(
+            r"^Day\s*\d", line, re.I
+        ):
             continue
         if _is_day_scoped_title(line):
             continue
@@ -981,7 +1000,9 @@ def _interpret_guidance_choice(message: str) -> str | None:
 
 
 def _extract_focus_topic(message: str, goal_type: str) -> str | None:
-    keyword_pool = COURSE_FOCUS_KEYWORDS if goal_type == "course_exploration" else SKILL_DIRECTION_KEYWORDS
+    keyword_pool = (
+        COURSE_FOCUS_KEYWORDS if goal_type == "course_exploration" else SKILL_DIRECTION_KEYWORDS
+    )
     for keyword in keyword_pool:
         if keyword.lower() in message.lower() or keyword in message:
             return keyword
@@ -1017,7 +1038,11 @@ def _extract_preference_snapshot(message: str) -> dict[str, Any]:
     if start_hint:
         snapshot["start_hint"] = start_hint
     period_hint = next(
-        (word for word in ("早上", "上午", "中午", "下午", "晚上", "今晚", "明晚") if word in message),
+        (
+            word
+            for word in ("早上", "上午", "中午", "下午", "晚上", "今晚", "明晚")
+            if word in message
+        ),
         None,
     )
     if period_hint:
@@ -1165,7 +1190,9 @@ def _pick_soft_preference(values: list[tuple[str, datetime | None]]) -> str | No
         if not isinstance(value, str) or not value.strip():
             continue
         normalized = value.strip()
-        score_map[normalized] = score_map.get(normalized, 0.0) + _soft_preference_weight(now, created_at)
+        score_map[normalized] = score_map.get(normalized, 0.0) + _soft_preference_weight(
+            now, created_at
+        )
     if not score_map:
         return None
     selected, score = max(score_map.items(), key=lambda item: item[1])
@@ -1177,8 +1204,6 @@ def _pick_soft_preference(values: list[tuple[str, datetime | None]]) -> str | No
 async def _load_user_preference_memory(user_id: int, db: AsyncSession) -> dict[str, Any]:
     user_result = await db.execute(select(User).where(User.id == user_id))
     user = user_result.scalar_one_or_none()
-    if hasattr(user, "__await__"):
-        user = await user
     memory: dict[str, Any] = {"preference_sources": {}}
     tone_style = getattr(user, "companion_tone_style", None) if user else None
     tone_locked = bool(getattr(user, "companion_tone_locked", False)) if user else False
@@ -1574,9 +1599,7 @@ def _build_guided_reply(
     if intent == "create_task" and action_result is not None:
         title = _display_title_short(getattr(action_result, "title", "这项学习任务"))
         if child_count:
-            return (
-                f"主任务「{title}」已进任务树，并补了 {child_count} 条子项；子项里可写具体步骤。"
-            )
+            return f"主任务「{title}」已进任务树，并补了 {child_count} 条子项；子项里可写具体步骤。"
         return f"主任务「{title}」已记入系统。"
 
     if intent in {"create_plan", "refine_plan"} and isinstance(action_result, dict):
@@ -1591,14 +1614,10 @@ def _build_guided_reply(
                     f"已保存为计划「{plan_title}」；主任务「{task_title}」下共 {child_count} 条子项，"
                     f"按天/阶段的详细步骤在子任务里，不必再和聊天长文一一对照。"
                 )
-            return (
-                f"计划「{plan_title}」和主任务「{task_title}」已建好了；要补细节可继续在子任务中展开。"
-            )
+            return f"计划「{plan_title}」和主任务「{task_title}」已建好了；要补细节可继续在子任务中展开。"
 
         if child_count:
-            return (
-                f"已在「{plan_title}」上继续细化了「{task_title}」，本轮回补了 {child_count} 条子项。"
-            )
+            return f"已在「{plan_title}」上继续细化了「{task_title}」，本轮回补了 {child_count} 条子项。"
         return f"已更新「{plan_title}」相关安排，主任务「{task_title}」仍挂在同一条主线上。"
 
     if intent == "update_task" and action_result is not None:
@@ -1642,7 +1661,9 @@ async def _maybe_generate_subtasks_from_reply(
     serialized_parent_before = task_service.serialize_task(refreshed_parent_before)
     existing_children = serialized_parent_before.get("children", [])
     existing_titles = {child["title"] for child in existing_children}
-    next_sort_order = max((child.get("sort_order", -1) for child in existing_children), default=-1) + 1
+    next_sort_order = (
+        max((child.get("sort_order", -1) for child in existing_children), default=-1) + 1
+    )
 
     if plan is not None:
         base_date = datetime.combine(plan.start_date, time(hour=20, minute=0))
@@ -1712,7 +1733,9 @@ async def process_chat_message(
         _extract_recent_action_context(structured_history),
         db,
     )
-    pending_action_proposal = _extract_pending_action_proposal(structured_history, proposal_id=proposal_id)
+    pending_action_proposal = _extract_pending_action_proposal(
+        structured_history, proposal_id=proposal_id
+    )
     if pending_action_proposal is None:
         pending_action_proposal = await _load_pending_action_proposal_from_db(
             session.id,
@@ -1738,9 +1761,9 @@ async def process_chat_message(
     proposal_commit_confirmed = False
 
     if pending_plan_request and not recent_context.get("plan_id"):
-        pending_goal_type = (
-            (pending_plan_request.get("entities") or {}).get("goal_type") or "general_learning"
-        )
+        pending_goal_type = (pending_plan_request.get("entities") or {}).get(
+            "goal_type"
+        ) or "general_learning"
         pending_stage = pending_plan_request.get("stage") or "initial_choice"
         pending_answers = dict(pending_plan_request.get("answers") or {})
         preference_time_budget = _sanitize_preference_text(merged_preferences.get("time_budget"))
@@ -1756,11 +1779,13 @@ async def process_chat_message(
             and preference_focus_topic
         ):
             pending_answers["focus_topic"] = preference_focus_topic
-        clarify_reply, clarify_next_prompt, next_stage, updated_answers = _build_pending_guidance_response(
-            goal_type=pending_goal_type,
-            stage=pending_stage,
-            message=message,
-            answers=pending_answers,
+        clarify_reply, clarify_next_prompt, next_stage, updated_answers = (
+            _build_pending_guidance_response(
+                goal_type=pending_goal_type,
+                stage=pending_stage,
+                message=message,
+                answers=pending_answers,
+            )
         )
 
         if next_stage != "ready_to_build":
@@ -1937,7 +1962,8 @@ async def process_chat_message(
                     "extracted_tasks": None,
                     "extracted_plans": None,
                     "sync_summary": None,
-                    "next_prompt": clarification_next_prompt or _build_force_clarify_next_prompt(goal_type),
+                    "next_prompt": clarification_next_prompt
+                    or _build_force_clarify_next_prompt(goal_type),
                     "next_prompt_options": _build_clarify_quick_replies(goal_type, next_stage),
                     "proposal_id": None,
                     "scenario_type": goal_type,
@@ -2002,7 +2028,10 @@ async def process_chat_message(
     else:
         intent, entities = resolve_intent(message, nlp_result, recent_context)
         if proposal_id:
-            if pending_action_proposal and str(pending_action_proposal.get("proposal_id")) == proposal_id:
+            if (
+                pending_action_proposal
+                and str(pending_action_proposal.get("proposal_id")) == proposal_id
+            ):
                 intent = str(pending_action_proposal.get("intent") or "create_plan")
                 entities, execution_message = _build_commit_entities_from_proposal(
                     proposal=pending_action_proposal,
@@ -2076,7 +2105,9 @@ async def process_chat_message(
             clarification_reply = clarification_reply_opt
             clarify_user_entities_payload = dict(entities or {})
             clarify_user_entities_payload["user_preferences"] = merged_preferences
-            clarify_user_entities_json = json.dumps(clarify_user_entities_payload, ensure_ascii=False)
+            clarify_user_entities_json = json.dumps(
+                clarify_user_entities_payload, ensure_ascii=False
+            )
             clarify_assistant_entities_str = json.dumps(
                 _attach_orchestration_diagnostics(
                     _build_pending_plan_entities(
@@ -2124,7 +2155,9 @@ async def process_chat_message(
                 ),
                 "proposal_id": None,
                 "scenario_type": entities.get("goal_type") or _classify_learning_goal(message),
-                "scenario_label": _scenario_label(entities.get("goal_type") or _classify_learning_goal(message)),
+                "scenario_label": _scenario_label(
+                    entities.get("goal_type") or _classify_learning_goal(message)
+                ),
             }
 
     if _should_stage_plan_proposal(intent, message):
@@ -2194,7 +2227,9 @@ async def process_chat_message(
             "next_prompt_options": ["按这个计划加入任务", "先改一下再加入计划"],
             "proposal_id": proposal_uid,
             "scenario_type": entities.get("goal_type") or _classify_learning_goal(message),
-            "scenario_label": _scenario_label(entities.get("goal_type") or _classify_learning_goal(message)),
+            "scenario_label": _scenario_label(
+                entities.get("goal_type") or _classify_learning_goal(message)
+            ),
         }
 
     action_result, extracted_tasks, extracted_plans = await execute_intent(
@@ -2253,7 +2288,9 @@ async def process_chat_message(
             "next_prompt_options": ["重试加入计划", "先精简为一周3个关键任务"],
             "proposal_id": failed_proposal_id,
             "scenario_type": entities.get("goal_type") or _classify_learning_goal(message),
-            "scenario_label": _scenario_label(entities.get("goal_type") or _classify_learning_goal(message)),
+            "scenario_label": _scenario_label(
+                entities.get("goal_type") or _classify_learning_goal(message)
+            ),
         }
 
     response_density = merged_preferences.get("response_density") or "standard"
@@ -2279,7 +2316,9 @@ async def process_chat_message(
     )
 
     sync_summary = _build_sync_summary(extracted_tasks, extracted_plans)
-    next_prompt, next_prompt_options = _build_next_step_guidance(intent, action_result, recent_context)
+    next_prompt, next_prompt_options = _build_next_step_guidance(
+        intent, action_result, recent_context
+    )
     _log_chat_orchestration(
         "action_completed",
         user_id=user_id,
@@ -2350,5 +2389,7 @@ async def process_chat_message(
         "next_prompt_options": next_prompt_options,
         "proposal_id": None,
         "scenario_type": entities.get("goal_type") or _classify_learning_goal(message),
-        "scenario_label": _scenario_label(entities.get("goal_type") or _classify_learning_goal(message)),
+        "scenario_label": _scenario_label(
+            entities.get("goal_type") or _classify_learning_goal(message)
+        ),
     }

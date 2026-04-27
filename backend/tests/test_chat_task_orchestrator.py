@@ -27,7 +27,12 @@ def test_resolve_intent_routes_resource_request_to_refine_existing_plan():
     intent, entities = resolve_intent(
         message="帮我一起把学习资源配上吧",
         nlp_result={"intent": "create_plan", "entities": {"plan_title": "学习资源"}},
-        recent_context={"plan_id": 12, "plan_title": "计算机核心课程学习计划", "task_id": 30, "task_title": "主任务"},
+        recent_context={
+            "plan_id": 12,
+            "plan_title": "计算机核心课程学习计划",
+            "task_id": 30,
+            "task_title": "主任务",
+        },
     )
 
     assert intent == "refine_plan"

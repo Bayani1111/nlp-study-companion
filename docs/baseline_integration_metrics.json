@@ -1,10 +1,10 @@
 {
   "sample_count": 30,
-  "conversation_success_rate": 0.9667,
+  "conversation_success_rate": 0.7667,
   "clarification_rate": 0.0333,
   "llm_fallback_degradation_rate": 0.0,
   "counts": {
-    "success_count": 29,
+    "success_count": 23,
     "clarify_count": 1,
     "fallback_count": 0
   },
@@ -12,44 +12,44 @@
   "by_scenario": {
     "course_exploration": {
       "total": 5,
-      "conversation_success_rate": 1.0,
+      "conversation_success_rate": 0.8,
       "clarification_rate": 0.0,
       "llm_fallback_degradation_rate": 0.0,
       "counts": {
-        "success_count": 5,
+        "success_count": 4,
         "clarify_count": 0,
         "fallback_count": 0
       }
     },
     "exam_prep": {
       "total": 3,
-      "conversation_success_rate": 1.0,
+      "conversation_success_rate": 0.3333,
       "clarification_rate": 0.0,
       "llm_fallback_degradation_rate": 0.0,
       "counts": {
-        "success_count": 3,
+        "success_count": 1,
         "clarify_count": 0,
         "fallback_count": 0
       }
     },
     "general": {
       "total": 20,
-      "conversation_success_rate": 0.95,
+      "conversation_success_rate": 0.85,
       "clarification_rate": 0.05,
       "llm_fallback_degradation_rate": 0.0,
       "counts": {
-        "success_count": 19,
+        "success_count": 17,
         "clarify_count": 1,
         "fallback_count": 0
       }
     },
     "skill_building": {
       "total": 2,
-      "conversation_success_rate": 1.0,
+      "conversation_success_rate": 0.5,
       "clarification_rate": 0.0,
       "llm_fallback_degradation_rate": 0.0,
       "counts": {
-        "success_count": 2,
+        "success_count": 1,
         "clarify_count": 0,
         "fallback_count": 0
       }

@@ -14,8 +14,8 @@ from app.schemas.tasks import (
     TaskResponse,
     TaskUpdate,
 )
-from app.services.task_cleanup_rules import decide_advisory_subtask_cleanup
 from app.services import task_service
+from app.services.task_cleanup_rules import decide_advisory_subtask_cleanup
 
 router = APIRouter()
 

@@ -1,13 +1,13 @@
 from __future__ import annotations
 
-from typing import Literal
+from typing import Literal, cast
 
 GoalType = Literal["course_exploration", "exam_prep", "skill_building", "general_learning"]
 
 
 def normalize_goal_type(goal_type: str) -> GoalType:
     if goal_type in {"course_exploration", "exam_prep", "skill_building"}:
-        return goal_type
+        return cast(GoalType, goal_type)
     return "general_learning"
 
 

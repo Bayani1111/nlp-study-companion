@@ -197,10 +197,13 @@ async def execute_chat_action(
 
             plan_extracted_tasks: list[dict] | None = None
             if entities.get("should_create_task"):
-                task_title = _clip_for_schema(
-                    str(entities.get("task_title") or plan.title),
-                    TASK_TITLE_MAX,
-                ) or plan.title
+                task_title = (
+                    _clip_for_schema(
+                        str(entities.get("task_title") or plan.title),
+                        TASK_TITLE_MAX,
+                    )
+                    or plan.title
+                )
                 task_desc = _clip_for_schema(
                     str(entities.get("description") or raw_desc or fallback_message),
                     TASK_DESC_MAX,
@@ -271,7 +274,9 @@ async def execute_chat_action(
                     "title": fallback_task_title or plan.title,
                     "due_date": due_date,
                     "priority": entities.get("priority", "medium"),
-                    "description": entities.get("description") or plan.description or fallback_message,
+                    "description": entities.get("description")
+                    or plan.description
+                    or fallback_message,
                     "plan_id": plan.id,
                 }
                 bound_task = await task_service.create_task(user_id, task_data, db)

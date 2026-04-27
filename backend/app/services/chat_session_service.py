@@ -80,8 +80,7 @@ async def load_history(
 ) -> list[HistoryMessage]:
     structured_history = await load_structured_history(session_id, db, limit=limit)
     return [
-        {"role": message["role"], "content": message["content"]}
-        for message in structured_history
+        {"role": message["role"], "content": message["content"]} for message in structured_history
     ]
 
 

@@ -235,7 +235,12 @@ async def _aggregate_chat_diagnostics(
             continue
         diagnostics_total += 1
         event_distribution[event] += 1
-        if event in {"force_clarify_initial", "force_clarify_seeded", "clarify_before_action", "pending_clarify_continue"}:
+        if event in {
+            "force_clarify_initial",
+            "force_clarify_seeded",
+            "clarify_before_action",
+            "pending_clarify_continue",
+        }:
             clarify_total += 1
             clarify_reason_distribution[event] += 1
         if event == "force_clarify_seeded":
@@ -244,7 +249,9 @@ async def _aggregate_chat_diagnostics(
             action_completed += 1
 
     clarify_switch_rate = round(switch_hits / clarify_total, 4) if clarify_total else 0.0
-    action_completion_rate = round(action_completed / diagnostics_total, 4) if diagnostics_total else 0.0
+    action_completion_rate = (
+        round(action_completed / diagnostics_total, 4) if diagnostics_total else 0.0
+    )
     return {
         "chat_diagnostic_total": diagnostics_total,
         "clarify_reason_distribution": dict(clarify_reason_distribution),

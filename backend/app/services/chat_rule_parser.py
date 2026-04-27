@@ -538,7 +538,9 @@ def extract_day_subtasks_from_reply(reply: str) -> list[dict[str, Any]]:
         if day_match:
             if current and (current["goal"] or current["items"]):
                 sections.append(current)
-            day_number = _parse_day_number(day_match.group(2) or day_match.group(3)) or len(sections) + 1
+            day_number = (
+                _parse_day_number(day_match.group(2) or day_match.group(3)) or len(sections) + 1
+            )
             current = {
                 "label": f"第{day_number}天",
                 "day_number": day_number,
@@ -586,7 +588,9 @@ def extract_day_subtasks_from_reply(reply: str) -> list[dict[str, Any]]:
         action_items = [x for x in (section.get("items") or []) if x]
         title = _day_subtask_title(section["label"], goal, action_items)
         description = _description_for_day_block(goal, action_items)
-        th = next((x for x in action_items if infer_time_of_day(x)), None) or (section.get("time_hint") or "")
+        th = next((x for x in action_items if infer_time_of_day(x)), None) or (
+            section.get("time_hint") or ""
+        )
         tval = infer_time_of_day(th or description) if th else None
         subtasks.append(
             {
@@ -654,7 +658,9 @@ def extract_goal_sections_from_reply(reply: str) -> list[dict[str, Any]]:
         action_items = [x for x in (section.get("items") or []) if x]
         title = _day_subtask_title(section["label"], goal, action_items)
         description = _description_for_day_block(goal, action_items)
-        th = next((x for x in action_items if infer_time_of_day(x)), None) or (section.get("time_hint") or "")
+        th = next((x for x in action_items if infer_time_of_day(x)), None) or (
+            section.get("time_hint") or ""
+        )
         tval = infer_time_of_day(th or description) if th else None
         subtasks.append(
             {
@@ -742,7 +748,9 @@ def build_fallback_entities(message: str) -> dict[str, Any]:
 
     title = re.sub(r"^(帮我|请|麻烦你|记得|提醒我|帮忙|给我)", "", title).strip()
     title = re.sub(r"^(有空(?:的时候)?|回头|之后)\s*(?:把)?", "", title).strip()
-    title = re.sub(r"^(?:今天|明天|后天|今晚|今早|明晚|晚上|下午|上午|早上)\s*(?:把)?", "", title).strip()
+    title = re.sub(
+        r"^(?:今天|明天|后天|今晚|今早|明晚|晚上|下午|上午|早上)\s*(?:把)?", "", title
+    ).strip()
     title = re.sub(r"(然后|并且).*$", "", title).strip()
     title = _compact_entity_title(title) or _compact_entity_title(cleaned)
     title = title[:36].strip() or cleaned[:36].strip()
@@ -788,7 +796,9 @@ def _compact_entity_title(raw: str) -> str:
         return ""
     if _looks_like_question_sentence(title):
         return ""
-    title = re.sub(r"(你推荐哪些|推荐哪些|有哪些|怎么学|怎么安排|可以吗|行吗|好吗|吧)$", "", title).strip()
+    title = re.sub(
+        r"(你推荐哪些|推荐哪些|有哪些|怎么学|怎么安排|可以吗|行吗|好吗|吧)$", "", title
+    ).strip()
     title = re.sub(r"(一起|帮我一起|顺便|先|再|然后).*$", "", title).strip()
     title = re.sub(r"[？?！!。,.，；;：:]+$", "", title).strip()
     return title

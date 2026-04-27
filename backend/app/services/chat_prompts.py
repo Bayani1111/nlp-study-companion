@@ -71,13 +71,12 @@ def _response_density_hint(response_density: str) -> str:
             "当前用户偏好信息密度：详细。\n"
             "请在保持自然对话的前提下，多给一点原因、步骤和选择依据，但仍避免冗长清单。"
         )
-    return (
-        "当前用户偏好信息密度：标准。\n"
-        "请保持自然、清楚、不过长的表达。"
-    )
+    return "当前用户偏好信息密度：标准。\n请保持自然、清楚、不过长的表达。"
 
 
-def build_companion_prompt(intent: str, action_result: Any = None, response_density: str = "standard") -> str:
+def build_companion_prompt(
+    intent: str, action_result: Any = None, response_density: str = "standard"
+) -> str:
     context_prompt = ""
 
     if intent == "create_task" and action_result is not None:
@@ -150,8 +149,7 @@ def build_companion_prompt(intent: str, action_result: Any = None, response_dens
     elif intent == "update_task" and action_result is not None:
         title = getattr(action_result, "title", str(action_result))
         context_prompt = (
-            f"用户刚更新了任务“{title}”。\n"
-            "请确认变更已经生效，并自然提醒后续最需要关注的一点。"
+            f"用户刚更新了任务“{title}”。\n请确认变更已经生效，并自然提醒后续最需要关注的一点。"
         )
 
     else:

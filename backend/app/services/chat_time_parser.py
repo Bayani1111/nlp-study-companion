@@ -42,7 +42,9 @@ def parse_chinese_relative_time(text: str, *, allow_period_only: bool = False) -
     elif "下周末" in text or "周末" in text:
         has_time_hint = bool(
             re.search(r"\d{1,2}\s*点", text)
-            or any(word in text for word in ("上午", "早上", "中午", "下午", "晚上", "今晚", "明晚"))
+            or any(
+                word in text for word in ("上午", "早上", "中午", "下午", "晚上", "今晚", "明晚")
+            )
         )
         if not has_time_hint:
             return None
@@ -96,7 +98,9 @@ def parse_chinese_relative_time(text: str, *, allow_period_only: bool = False) -
         explicit_minute = match.group(2)
         parsed_half = match.group(3)
 
-        if ("下午" in text or "晚上" in text or "今晚" in text or "明晚" in text) and parsed_hour < 12:
+        if (
+            "下午" in text or "晚上" in text or "今晚" in text or "明晚" in text
+        ) and parsed_hour < 12:
             parsed_hour += 12
         elif "中午" in text and parsed_hour < 11:
             parsed_hour += 12

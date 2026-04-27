@@ -1,5 +1,5 @@
-import secrets
 import json
+import secrets
 from datetime import datetime, timedelta, timezone
 
 import bcrypt
@@ -49,7 +49,9 @@ def _pick_soft_preference(values: list[tuple[str, datetime | None]]) -> str | No
         if not isinstance(value, str) or not value.strip():
             continue
         normalized = value.strip().lower()
-        score_map[normalized] = score_map.get(normalized, 0.0) + _soft_preference_weight(now, created_at)
+        score_map[normalized] = score_map.get(normalized, 0.0) + _soft_preference_weight(
+            now, created_at
+        )
     if not score_map:
         return None
     selected, score = max(score_map.items(), key=lambda item: item[1])

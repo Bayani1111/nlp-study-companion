@@ -10,8 +10,8 @@ from app.services.chat_rule_parser import (
     looks_like_consultation_question,
     looks_like_continuation_request,
     looks_like_plan_follow_up_answer,
-    looks_like_resource_enrichment_request,
     looks_like_refinement_request,
+    looks_like_resource_enrichment_request,
     needs_plan_clarification,
 )
 from app.services.chat_time_parser import parse_natural_due_date
@@ -40,8 +40,10 @@ def resolve_intent(
             fallback_entities = build_fallback_entities(message)
             entities = {**fallback_entities, **(recent_context or {}), **entities}
 
-    if (looks_like_refinement_request(message) or looks_like_continuation_request(message)) and recent_context and (
-        recent_context.get("plan_id") or recent_context.get("task_id")
+    if (
+        (looks_like_refinement_request(message) or looks_like_continuation_request(message))
+        and recent_context
+        and (recent_context.get("plan_id") or recent_context.get("task_id"))
     ):
         intent = "refine_plan" if recent_context.get("plan_id") else "create_task"
         fallback_entities = build_fallback_entities(message)
@@ -54,7 +56,11 @@ def resolve_intent(
         elif recent_context.get("plan_title"):
             entities["task_title"] = recent_context["plan_title"]
 
-    if recent_context and recent_context.get("plan_id") and looks_like_resource_enrichment_request(message):
+    if (
+        recent_context
+        and recent_context.get("plan_id")
+        and looks_like_resource_enrichment_request(message)
+    ):
         intent = "refine_plan"
         fallback_entities = build_fallback_entities(message)
         entities = {**fallback_entities, **recent_context, **entities}
@@ -65,7 +71,12 @@ def resolve_intent(
 
     pending_plan_request = (recent_context or {}).get("pending_plan_request")
     if pending_plan_request and not (recent_context or {}).get("plan_id"):
-        if intent in {"chat", "general_chat", "refine_plan", "create_plan"} and looks_like_plan_follow_up_answer(message):
+        if intent in {
+            "chat",
+            "general_chat",
+            "refine_plan",
+            "create_plan",
+        } and looks_like_plan_follow_up_answer(message):
             intent = "create_plan"
             fallback_entities = build_fallback_entities(message)
             pending_entities = pending_plan_request.get("entities") or {}
@@ -74,7 +85,9 @@ def resolve_intent(
                 **fallback_entities,
                 **entities,
             }
-            entities["plan_description"] = f"{pending_plan_request.get('message', '').strip()}；{message.strip()}".strip("；")
+            entities["plan_description"] = (
+                f"{pending_plan_request.get('message', '').strip()}；{message.strip()}".strip("；")
+            )
             if not entities.get("task_title") and entities.get("plan_title"):
                 entities["task_title"] = entities["plan_title"]
 
